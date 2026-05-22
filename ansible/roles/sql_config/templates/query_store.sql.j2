@@ -1,0 +1,14 @@
+-- templates/query_store.sql.j2
+IF EXISTS (
+    SELECT 1 FROM sys.database_query_store_options 
+    WHERE actual_state = 0
+)
+BEGIN
+    ALTER DATABASE CURRENT SET QUERY_STORE = ON;
+    ALTER DATABASE CURRENT SET QUERY_STORE (OPERATION_MODE = READ_WRITE);
+    SELECT 'CHANGED' AS Status;
+END
+ELSE
+BEGIN
+    SELECT 'NO_CHANGE' AS Status;
+END

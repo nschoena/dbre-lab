@@ -1,0 +1,8 @@
+---
+- name: Configure Azure SQL Database Settings
+  hosts: dev_sql_servers
+  gather_facts: false
+
+  roles:
+    - sql_config
+    
