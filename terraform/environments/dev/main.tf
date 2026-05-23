@@ -12,6 +12,12 @@ terraform {
         version = ">= 3.0"
     }
   }
+  backend "azurerm" {
+    resource_group_name  = "tfstate-rg"
+    storage_account_name = "dbrelabtfstate"
+    container_name       = "tfstate"
+    key                  = "dev.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
@@ -23,7 +29,8 @@ module "azure_sql_database" {
   environment  = "dev"
   location     = "Central US"
   database_sku = "Basic"
-  
+  sql_admin_password = var.sql_admin_password
+
   # Define your specific Dev tags here
   tags = {
     Environment = "dev"

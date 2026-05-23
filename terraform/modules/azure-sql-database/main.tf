@@ -30,7 +30,8 @@ resource "azurerm_mssql_server" "sql_server" {
   location                     = azurerm_resource_group.rg_day2_lab.location
   version                      = "12.0"
   administrator_login          = "sqladmin"
-  administrator_login_password = "P@ssw0rd1234!"
+  # changed administrator_login_password to a variable assignment for better security and flexibility
+  administrator_login_password = var.sql_admin_password
 }
 
 resource "azurerm_mssql_database" "database" {

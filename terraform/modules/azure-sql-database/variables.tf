@@ -30,3 +30,9 @@ variable "tags" {
   description = "A mapping of tags to assign to the resource."
   default     = {}
 }
+
+variable "sql_admin_password" {
+  description = "The password for the SQL Server admin account."
+  type        = string
+  sensitive   = true
+}
