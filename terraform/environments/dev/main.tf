@@ -30,6 +30,7 @@ module "azure_sql_database" {
   location     = "Central US"
   database_sku = "Basic"
   sql_admin_password = var.sql_admin_password
+  my_home_ip = var.my_home_ip
 
   # Define your specific Dev tags here
   tags = {
