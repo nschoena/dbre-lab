@@ -18,6 +18,7 @@ jobs:
 
       # Terraform Variables
       TF_VAR_sql_admin_password: ${{ secrets.SQL_ADMIN_PASSWORD }}
+      TF_VAR_my_home_ip: ${{ secrets.MY_HOME_IP }}
 
     steps:
       - name: Checkout Code

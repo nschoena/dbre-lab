@@ -57,9 +57,19 @@ data "http" "my_ip" {
   url = "https://api.ipify.org"
 }
 
-resource "azurerm_mssql_firewall_rule" "allow_local" {
-  name             = "AllowLocalClient"
+resource "azurerm_mssql_firewall_rule" "allow_runner" {
+  # This firewall rule is for wherever the code is executing.
+  # If running in GitHub Actions, it will use the GitHub Actions runner's IP
+  
+  name             = "AllowGitHubRunner"
   server_id        = azurerm_mssql_server.sql_server.id
   start_ip_address = data.http.my_ip.response_body
   end_ip_address   = data.http.my_ip.response_body
+}
+
+resource "azurerm_mssql_firewall_rule" "allow_home" {
+  name             = "AllowMoorheadHome"
+  server_id        = azurerm_mssql_server.sql_server.id
+  start_ip_address = var.my_home_ip
+  end_ip_address   = var.my_home_ip
 }
