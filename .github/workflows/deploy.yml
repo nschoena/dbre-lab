@@ -44,9 +44,14 @@ jobs:
         working-directory: ./terraform/environments/dev        
   
   deploy-prod:
-    runs-on: ubuntu-latest
+    name: "Deploy to Production"
     needs: deploy-dev
     if: github.ref == 'refs/heads/main' # Only deploy to prod from the main branch
+    runs-on: ubuntu-latest
+    
+    # THIS LINE LINKS TO THE SETTINGS YOU JUST MADE
+    environment: production
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
