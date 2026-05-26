@@ -2,7 +2,7 @@ name: DBRE Lab Deployment
 
 on:
   push:
-    branches: [ "feature/github-actions", "main" ]
+    branches: [ "feature/**", "main" ] # This matches any branch that starts with "feature/" and the "main" branch
 
 # These environment variables link your GitHub Secrets to the Runner
 env:
@@ -18,6 +18,7 @@ env:
 
 jobs:
   deploy-dev:
+    name: "Provision & Configure Dev"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -27,7 +28,8 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
+      
+      # --- INFRASTRUCTURE PHASE ---
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -40,9 +42,36 @@ jobs:
         working-directory: ./terraform/environments/dev
 
       - name: Dev Terraform Apply
-        run: terraform apply -auto-approve -input=false
+        run: |
+          terraform apply -auto-approve -input=false
+          echo "DEV_SQL_FQDN=$(terraform output -raw dev_sql_server_fqdn)" >> $GITHUB_ENV
         working-directory: ./terraform/environments/dev        
+ 
+      # --- CONFIGURATION PHASE ---
+      - name: Install SQL Drivers and Ansible
+        run: |
+          # 1. Add Microsoft's repository for the ODBC Driver
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+          curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          
+          sudo apt-get update
+          # 2. Install Python pip, system headers, and the Microsoft ODBC Driver
+          sudo ACCEPT_EULA=Y apt-get install -y python3-pip unixodbc-dev msodbcsql18
+          
+          # 3. Install Python libraries and Ansible
+          # We use --upgrade to ensure we have the latest pip for pyodbc compatibility
+          pip3 install --upgrade pip
+          pip3 install pyodbc ansible
   
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook ansible/configure_dev_sql.yml \
+            -i "${{ env.DEV_SQL_FQDN }}," \
+            --extra-vars "admin_user=${{ secrets.SQL_ADMIN_USER }} \
+                          admin_password=${{ secrets.SQL_ADMIN_PASSWORD }} \
+                          contained_user_name=${{ secrets.DEV_CONTAINED_USER }} \
+                          contained_user_password=${{ secrets.DEV_CONTAINED_PASSWORD }}"
+
   deploy-prod:
     name: "Deploy to Production"
     needs: deploy-dev

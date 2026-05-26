@@ -40,19 +40,3 @@ module "azure_sql_database" {
     ManagedBy   = "Terraform"
   }
 }
-
-output "resource_group_name" {
-  value = module.azure_sql_database.resource_group_name
-}
-
-output "my_ip_address" {
-  value = module.azure_sql_database.my_ip_address
-}
-
-output "sql_server_name" {
-  value = module.azure_sql_database.sql_server_name
-}
-
-output "sql_database_name" {
-  value = module.azure_sql_database.sql_database_name
-}
