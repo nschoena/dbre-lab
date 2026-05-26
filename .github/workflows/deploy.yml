@@ -13,7 +13,7 @@ env:
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   DEV_SQL_FQDN: "" # This will be set dynamically after Terraform applies the dev environment
   DEV_SQL_DB_NAME: "" # This will be set dynamically after Terraform applies the dev environment
-  
+
   # Terraform Variables
   TF_VAR_sql_admin_password: ${{ secrets.SQL_ADMIN_PASSWORD }}
   TF_VAR_my_home_ip: ${{ secrets.MY_HOME_IP }}
@@ -59,12 +59,15 @@ jobs:
           
           sudo apt-get update
           # 2. Install Python pip, system headers, and the Microsoft ODBC Driver
-          sudo ACCEPT_EULA=Y apt-get install -y python3-pip unixodbc-dev msodbcsql18
+          sudo ACCEPT_EULA=Y apt-get install -y unixodbc-dev msodbcsql18
           
           # 3. Install Python libraries and Ansible
           # We use --upgrade to ensure we have the latest pip for pyodbc compatibility
-          pip3 install --upgrade pip
-          pip3 install pyodbc ansible
+          python3 -m pip install --user --upgrade pip
+          python3 -m pip install --user pyodbc ansible
+
+          # 4. Add the user pip directory to the PATH for the rest of the job
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
   
       - name: Run Ansible Playbook
         run: |
