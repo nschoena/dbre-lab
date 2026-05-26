@@ -12,6 +12,12 @@ terraform {
         version = ">= 3.0"
     }
   }
+  backend "azurerm" {
+  resource_group_name  = "tfstate-rg"
+  storage_account_name = "dbrelabtfstate"
+  container_name       = "tfstate"
+  key                  = "prod.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
@@ -23,6 +29,7 @@ module "azure_sql_database" {
   environment = "prod"
   location = "Central US"
   database_sku = "S0"
+  # Added the sql_admin_password and my_home_ip variable assignments to pass the values from the environment variables defined in variables.tf
   sql_admin_password = var.sql_admin_password
   my_home_ip = var.my_home_ip
 
