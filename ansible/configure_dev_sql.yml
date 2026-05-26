@@ -1,6 +1,6 @@
 ---
 - name: Configure Azure SQL Database Settings
-  hosts: dev_sql_servers
+  hosts: all
   gather_facts: false
 
   roles:
