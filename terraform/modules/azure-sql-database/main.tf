@@ -30,7 +30,8 @@ resource "azurerm_mssql_server" "sql_server" {
   location                     = azurerm_resource_group.rg_day2_lab.location
   version                      = "12.0"
   administrator_login          = "sqladmin"
-  administrator_login_password = "P@ssw0rd1234!"
+  # changed administrator_login_password to a variable assignment for better security and flexibility
+  administrator_login_password = var.sql_admin_password
 }
 
 resource "azurerm_mssql_database" "database" {
@@ -56,9 +57,19 @@ data "http" "my_ip" {
   url = "https://api.ipify.org"
 }
 
-resource "azurerm_mssql_firewall_rule" "allow_local" {
-  name             = "AllowLocalClient"
+resource "azurerm_mssql_firewall_rule" "allow_runner" {
+  # This firewall rule is for wherever the code is executing.
+  # If running in GitHub Actions, it will use the GitHub Actions runner's IP
+  
+  name             = "AllowGitHubRunner"
   server_id        = azurerm_mssql_server.sql_server.id
   start_ip_address = data.http.my_ip.response_body
   end_ip_address   = data.http.my_ip.response_body
+}
+
+resource "azurerm_mssql_firewall_rule" "allow_home" {
+  name             = "AllowMoorheadHome"
+  server_id        = azurerm_mssql_server.sql_server.id
+  start_ip_address = var.my_home_ip
+  end_ip_address   = var.my_home_ip
 }
