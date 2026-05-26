@@ -27,3 +27,13 @@
   changed_when:
     - sql_config_user_creation_result.query_results is defined
     - "'CHANGED' in sql_config_user_creation_result.query_results[0]"
+
+# 3. Handle Deployment Auditing
+- name: Ensure Deployment Audit Table and Record
+  community.general.mssql_script:
+    login_user: "{{ admin_user }}"
+    login_password: "{{ admin_password }}"
+    login_host: "{{ inventory_hostname }}"
+    db: "{{ db_name }}"
+    script: "{{ lookup('template', 'deployment_audit.sql.j2') }}"
+  delegate_to: localhost

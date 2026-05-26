@@ -73,11 +73,15 @@ jobs:
         run: |
           ansible-playbook ansible/configure_dev_sql.yml \
             -i "${{ env.DEV_SQL_FQDN }}," \
-            --extra-vars "admin_user=${{ secrets.SQL_ADMIN_USER }} \
+            --extra-vars "db_name=${{ env.DEV_SQL_DB_NAME }} \
+                          admin_user=${{ secrets.SQL_ADMIN_USER }} \
                           admin_password=${{ secrets.SQL_ADMIN_PASSWORD }} \
                           contained_user_name=${{ secrets.DEV_CONTAINED_USER }} \
                           contained_user_password=${{ secrets.DEV_CONTAINED_PASSWORD }} \
-                          db_name=${{ env.DEV_SQL_DB_NAME }}"
+                          gh_run_id=${{ github.run_id }} \
+                          gh_actor=${{ github.actor }} \
+                          gh_ref=${{ github.ref }} \
+                          gh_sha=${{ github.sha }}"
 
   deploy-prod:
     name: "Deploy to Production"
