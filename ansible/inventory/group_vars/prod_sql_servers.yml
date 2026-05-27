@@ -1,13 +1,5 @@
 ---
 # ansible/group_vars/prod_sql_servers.yml
 
-# Administrative credentials for the SQL Engine
-admin_user: "sqladmin"
-admin_password: "P@ssw0rd1234!"  # We can talk about Ansible Vault later to encrypt this
-
 # Database specific settings
 db_name: "db-prod-day2-lab"
-
-# The new user we want to create
-contained_user_name: "prod_db_monitor_user"
-contained_user_password: "StrongPassword123!"

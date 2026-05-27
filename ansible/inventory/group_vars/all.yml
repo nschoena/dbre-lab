@@ -1,0 +1,7 @@
+---
+# This applies to all hosts, even those passed via -i
+ansible_python_interpreter: /usr/bin/python3
+
+# Tell the mssql_script module to use the ODBC driver we installed
+# This prevents it from defaulting to the missing 'pymssql' library
+mssql_db_driver: 'ODBC Driver 18 for SQL Server'
