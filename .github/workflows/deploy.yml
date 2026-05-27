@@ -144,7 +144,7 @@ jobs:
       - name: Run Ansible Playbook for Dev
         run: |
           ansible-playbook ansible/configure_prod_sql.yml \
-            -i "${{ env.DEV_SQL_FQDN }}," \
+            -i "${{ env.PROD_SQL_FQDN }}," \
             --extra-vars "db_name=${{ env.PROD_SQL_DB_NAME }} \
                           admin_user=${{ secrets.SQL_ADMIN_USER }} \
                           admin_password=${{ secrets.SQL_ADMIN_PASSWORD }} \
