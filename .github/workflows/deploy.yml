@@ -86,7 +86,7 @@ jobs:
                           gh_sha=${{ github.sha }}"
 
   deploy-prod:
-    name: "Deploy to Production"
+    name: "Provision & Configure Prod"
     needs: deploy-dev
     if: github.ref == 'refs/heads/main' # Only deploy to prod from the main branch
     runs-on: ubuntu-latest
