@@ -13,7 +13,7 @@ output "sql_server_name" {
   description = "The name of the SQL Server instance created in the production environment."
 }
 
-output "sql_database_name" {
+output "prod_sql_database_name" {
   value = module.azure_sql_database.sql_database_name
   description = "The name of the SQL Database created in the production environment."
 }

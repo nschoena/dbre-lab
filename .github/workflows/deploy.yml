@@ -13,6 +13,8 @@ env:
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   DEV_SQL_FQDN: "" # This will be set dynamically after Terraform applies the dev environment
   DEV_SQL_DB_NAME: "" # This will be set dynamically after Terraform applies the dev environment
+  PROD_SQL_FQDN: "" # This will be set dynamically after Terraform applies the prod environment
+  PROD_SQL_DB_NAME: "" # This will be set dynamically after Terraform applies the prod environment
 
   # Terraform Variables
   TF_VAR_sql_admin_password: ${{ secrets.SQL_ADMIN_PASSWORD }}
@@ -69,7 +71,7 @@ jobs:
           # 4. Add the user pip directory to the PATH for the rest of the job
           echo "$HOME/.local/bin" >> $GITHUB_PATH
   
-      - name: Run Ansible Playbook
+      - name: Run Ansible Playbook for Dev
         run: |
           ansible-playbook ansible/configure_dev_sql.yml \
             -i "${{ env.DEV_SQL_FQDN }}," \
@@ -89,7 +91,7 @@ jobs:
     if: github.ref == 'refs/heads/main' # Only deploy to prod from the main branch
     runs-on: ubuntu-latest
     
-    # THIS LINE LINKS TO THE SETTINGS YOU JUST MADE
+    # Using production environment so it requires manual approval for deployment to production
     environment: production
     
     steps:
@@ -100,7 +102,8 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
+      
+      # --- INFRASTRUCTURE PHASE ---
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -113,5 +116,41 @@ jobs:
         working-directory: ./terraform/environments/prod
 
       - name: Prod Terraform Apply
-        run: terraform apply -auto-approve -input=false
-        working-directory: ./terraform/environments/prod
+        run: |
+          terraform apply -auto-approve -input=false
+          echo "PROD_SQL_FQDN=$(terraform output -raw prod_sql_server_fqdn)" >> $GITHUB_ENV
+          echo "PROD_SQL_DB_NAME=$(terraform output -raw prod_sql_database_name)" >> $GITHUB_ENV
+        working-directory: ./terraform/environments/prod     
+ 
+      # --- CONFIGURATION PHASE ---
+      - name: Install SQL Drivers and Ansible
+        run: |
+          # 1. Add Microsoft's repository for the ODBC Driver
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+          curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          
+          sudo apt-get update
+          # 2. Install Python pip, system headers, and the Microsoft ODBC Driver
+          sudo ACCEPT_EULA=Y apt-get install -y unixodbc-dev msodbcsql18
+          
+          # 3. Install Python libraries and Ansible
+          # We use --upgrade to ensure we have the latest pip for pyodbc compatibility
+          python3 -m pip install --user --upgrade pip
+          python3 -m pip install --user pymssql pyodbc ansible
+
+          # 4. Add the user pip directory to the PATH for the rest of the job
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Run Ansible Playbook for Dev
+        run: |
+          ansible-playbook ansible/configure_prod_sql.yml \
+            -i "${{ env.DEV_SQL_FQDN }}," \
+            --extra-vars "db_name=${{ env.PROD_SQL_DB_NAME }} \
+                          admin_user=${{ secrets.SQL_ADMIN_USER }} \
+                          admin_password=${{ secrets.SQL_ADMIN_PASSWORD }} \
+                          contained_user_name=${{ secrets.PROD_CONTAINED_USER }} \
+                          contained_user_password=${{ secrets.PROD_CONTAINED_PASSWORD }} \
+                          gh_run_id=${{ github.run_id }} \
+                          gh_actor=${{ github.actor }} \
+                          gh_ref=${{ github.ref }} \
+                          gh_sha=${{ github.sha }}"

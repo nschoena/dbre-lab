@@ -33,7 +33,7 @@ module "azure_sql_database" {
   sql_admin_password = var.sql_admin_password
   my_home_ip = var.my_home_ip
 
-  # Define your specific Dev tags here
+  # Define your specific Prod tags here
   tags = {
     Environment = "prod"
     Owner       = "Nathan"
