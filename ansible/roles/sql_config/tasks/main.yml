@@ -29,11 +29,17 @@
     - "'CHANGED' in sql_config_user_creation_result.query_results[0]"
 
 # 3. Handle Deployment Auditing
-- name: Ensure Deployment Audit Table and Record
-  community.general.mssql_script:
-    login_user: "{{ admin_user }}"
-    login_password: "{{ admin_password }}"
-    login_host: "{{ inventory_hostname }}"
-    db: "{{ db_name }}"
-    script: "{{ lookup('template', 'deployment_audit.sql.j2') }}"
+- name: Write Audit Log to Azure Table
+  ansible.builtin.shell: |
+    az storage entity insert \
+      --account-name dbrelabtfstate \
+      --table-name AnsibleDeploymentAudit \
+      --entity \
+        PartitionKey="{{ env_name }}" \
+        RowKey="{{ github_run_id }}" \
+        Engineer="{{ gh_actor }}" \
+        Status="Success" \
+        Action="Infrastructure Deployment" \
+        Timestamp="{{ lookup('pipe', 'date -u +"%Y-%m-%dT%H:%M:%SZ"') }}"
   delegate_to: localhost
+  changed_when: false
