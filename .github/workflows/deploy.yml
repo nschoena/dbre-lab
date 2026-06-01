@@ -1,8 +1,16 @@
 name: DBRE Lab Deployment
 
 on:
-  push:
-    branches: [ "feature/**", "main" ] # This matches any branch that starts with "feature/" and the "main" branch
+  # DECOMMISSIONED: 2026-06-01
+  # This project is currently in a "parked" state. 
+  # Automated triggers are disabled to prevent accidental re-provisioning of resources
+  # after the manual 'terraform destroy' was performed.
+  
+  # push:
+  #   branches: [ "feature/**", "main" ] 
+  
+  # Keeping workflow_dispatch enabled allows for manual runs if needed in the future
+  workflow_dispatch:
 
 # These environment variables link your GitHub Secrets to the Runner
 env:
@@ -78,8 +86,7 @@ jobs:
         run: |
           ansible-playbook ansible/configure_dev_sql.yml \
             -i "${{ env.DEV_SQL_FQDN }}," \
-            --extra-vars "env_name=dev \
-                          db_name=${{ env.DEV_SQL_DB_NAME }} \
+            --extra-vars "db_name=${{ env.DEV_SQL_DB_NAME }} \
                           admin_user=${{ secrets.SQL_ADMIN_USER }} \
                           admin_password=${{ secrets.SQL_ADMIN_PASSWORD }} \
                           contained_user_name=${{ secrets.DEV_CONTAINED_USER }} \
@@ -149,8 +156,7 @@ jobs:
         run: |
           ansible-playbook ansible/configure_prod_sql.yml \
             -i "${{ env.PROD_SQL_FQDN }}," \
-            --extra-vars "env_name=prod \
-                          db_name=${{ env.PROD_SQL_DB_NAME }} \
+            --extra-vars "db_name=${{ env.PROD_SQL_DB_NAME }} \
                           admin_user=${{ secrets.SQL_ADMIN_USER }} \
                           admin_password=${{ secrets.SQL_ADMIN_PASSWORD }} \
                           contained_user_name=${{ secrets.PROD_CONTAINED_USER }} \
