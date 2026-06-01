@@ -36,7 +36,7 @@
       --table-name AnsibleDeploymentAudit \
       --entity \
         PartitionKey="{{ env_name }}" \
-        RowKey="{{ github_run_id }}" \
+        RowKey="{{ gh_run_id }}" \
         Engineer="{{ gh_actor }}" \
         Status="Success" \
         Action="Infrastructure Deployment" \
