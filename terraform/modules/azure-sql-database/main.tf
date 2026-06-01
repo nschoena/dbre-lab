@@ -73,3 +73,14 @@ resource "azurerm_mssql_firewall_rule" "allow_home" {
   start_ip_address = var.my_home_ip
   end_ip_address   = var.my_home_ip
 }
+
+# adding infrastrucure for storing auditing logs in a table in a storage account
+data "azurerm_storage_account" "existing" {
+  name                = "dbrelabtfstate"
+  resource_group_name = "tfstate-rg" 
+}
+
+resource "azurerm_storage_table" "audit_log" {
+  name                 = "AnsibleDeploymentAudit"
+  storage_account_name = data.azurerm_storage_account.existing.name
+}

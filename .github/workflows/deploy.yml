@@ -78,7 +78,8 @@ jobs:
         run: |
           ansible-playbook ansible/configure_dev_sql.yml \
             -i "${{ env.DEV_SQL_FQDN }}," \
-            --extra-vars "db_name=${{ env.DEV_SQL_DB_NAME }} \
+            --extra-vars "env_name=dev \
+                          db_name=${{ env.DEV_SQL_DB_NAME }} \
                           admin_user=${{ secrets.SQL_ADMIN_USER }} \
                           admin_password=${{ secrets.SQL_ADMIN_PASSWORD }} \
                           contained_user_name=${{ secrets.DEV_CONTAINED_USER }} \
@@ -148,7 +149,8 @@ jobs:
         run: |
           ansible-playbook ansible/configure_prod_sql.yml \
             -i "${{ env.PROD_SQL_FQDN }}," \
-            --extra-vars "db_name=${{ env.PROD_SQL_DB_NAME }} \
+            --extra-vars "env_name=prod \
+                          db_name=${{ env.PROD_SQL_DB_NAME }} \
                           admin_user=${{ secrets.SQL_ADMIN_USER }} \
                           admin_password=${{ secrets.SQL_ADMIN_PASSWORD }} \
                           contained_user_name=${{ secrets.PROD_CONTAINED_USER }} \
