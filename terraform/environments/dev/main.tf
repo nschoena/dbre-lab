@@ -28,7 +28,7 @@ module "azure_sql_database" {
   source       = "../../modules/azure-sql-database"
   environment  = "dev"
   location     = "Central US"
-  database_sku = "Basic"
+  database_sku = "S0"
   sql_admin_password = var.sql_admin_password
   my_home_ip = var.my_home_ip
 
